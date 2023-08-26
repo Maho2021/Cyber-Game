@@ -18,7 +18,7 @@ public class Unit : MonoBehaviour
     public int damage;
     
     // Ammo Variables 
-    private int minAmmo = 0;
+    // private int minAmmo = 0;
     private int maxAmmo = 5;
     public int currentAmmo = 1;
     public int reloadAmount = 1;
@@ -31,7 +31,11 @@ public class Unit : MonoBehaviour
     public int attack = 0;
     public int defense = 0;
     public int speed = 0;
-    public int droneIntelligence = 0;
+    public string droneIntelligence;
+    private int droneClass = 0;
+
+    //Boost Variables
+    private float baseBoostPercentage = 0.05f;
 
     // Function that deals damage to player and checks wheather a player is dead or alive returns bool after check
     public bool UnitDeadCheck()
@@ -76,7 +80,7 @@ public class Unit : MonoBehaviour
 
     public void ReRollAtt()
     {
-        int switchAttribute = Random.Range(1, 5);
+        int switchAttribute = Random.Range(1, 4);
         
         if (switchAttribute == 1)
         {
@@ -93,11 +97,7 @@ public class Unit : MonoBehaviour
             speed = Random.Range(2, 13);
             Debug.Log("speed Attribute is now: " + speed + "!");
         }
-        else if (switchAttribute == 4)
-        {
-            droneIntelligence = Random.Range(2, 13);
-            Debug.Log("drone intellidence Attribute is now: " + droneIntelligence + "!");
-        }
+
     }
 
     public void AssignRandomAttributes()
@@ -105,6 +105,31 @@ public class Unit : MonoBehaviour
         attack = Random.Range(2, 13);
         defense = Random.Range(2, 13);
         speed = Random.Range(2, 13);
-        droneIntelligence = Random.Range(2, 13);
+
+        droneClass = Random.Range(2, 13);
+
+        if (droneClass > 1 && droneClass < 5)
+        {
+            droneIntelligence = "F";
+        }
+        else if (droneClass > 4 && droneClass < 8)
+        {
+            droneIntelligence = "C";
+        }
+        else if (droneClass > 7 && droneClass < 11)
+        {
+            droneIntelligence = "B";
+        }
+        else
+        {
+            droneIntelligence = "S";
+        }
+    }
+
+    public void BuffHealth()
+    {
+        float boostPercentage = baseBoostPercentage + (0.05f * (defense - 2));
+
+        Debug.Log(boostPercentage);
     }
 }

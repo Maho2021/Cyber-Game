@@ -7,6 +7,8 @@ using TMPro;
 public enum BattleState { START, DECISION, RESOLVE, WON, LOST}
 
 public class BattleSystem : MonoBehaviour
+
+    //test
 {
     // GameObject Prefabs For Spawning
     public GameObject playerPrefab;
@@ -19,6 +21,8 @@ public class BattleSystem : MonoBehaviour
     // Variables that will be holding all the attributes of the players
     Unit playerUnit;
     Unit enemyUnit;
+    private Animator playerAnimator;
+    private Animator enemyAnimator;
 
     //
     public bool isEnemyDead = false;
@@ -63,6 +67,7 @@ public class BattleSystem : MonoBehaviour
         GameObject playerGo = Instantiate(playerPrefab, playerSpawn.position, Quaternion.identity);
         playerUnit = playerGo.GetComponent<Unit>();
         playerUnit.Name = "Player";
+        playerAnimator = playerUnit.GetComponent<Animator>();
         // playerAnimator = playerUnit.GetComponent<Animator>();
 
         // Spawn Enemy and assign all attributes to the enemyUnit Varaible
@@ -70,6 +75,7 @@ public class BattleSystem : MonoBehaviour
         GameObject enemyGo = Instantiate(enemyPrefab, enemySpawn.position, rotation);
         enemyUnit = enemyGo.GetComponent<Unit>();
         enemyUnit.Name = "Enemy";
+        enemyAnimator = enemyUnit.GetComponent<Animator>();
 
         // Wait 2 seconds
         yield return new WaitForSeconds(2f);
@@ -83,7 +89,9 @@ public class BattleSystem : MonoBehaviour
         yield return new WaitForSeconds(2f);
         speedattrText.text = playerUnit.speed.ToString();
         yield return new WaitForSeconds(2f);
-        droneintattrText.text = playerUnit.droneIntelligence.ToString();
+        droneintattrText.text = playerUnit.droneIntelligence;
+
+        playerUnit.BuffHealth();
 
         // Change GameState to DECISION and jump to SimultaneousDecisionMaking Function
         state = BattleState.DECISION;
@@ -98,7 +106,9 @@ public class BattleSystem : MonoBehaviour
             yield break;
         }
 
+        yield return new WaitForSeconds(3);
         state = BattleState.DECISION;
+        playerAnimator.SetBool("IsShooting", false);
         playerActionSelected = false;
         enemyActionSelected = true;
 
@@ -265,7 +275,7 @@ public class BattleSystem : MonoBehaviour
         if (playerUnit.currentAmmo > 0)
         {
             playerUnit.currentAmmo -= 1;
-            // playerAnimator.SetTrigger("AttackTrigger");
+            playerAnimator.SetBool("IsShooting", true);
             enemyUnit.currentHP -= playerUnit.damage;
             Debug.Log("You hit the ememy, there health is now: " + enemyUnit.currentHP);
             UpdateHealthBar(enemyUnit, enemyHealthBar);
