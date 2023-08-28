@@ -44,6 +44,14 @@ public class BattleSystem : MonoBehaviour
     public TextMeshProUGUI defenseattrText;
     public TextMeshProUGUI speedattrText;
     public TextMeshProUGUI droneintattrText;
+
+    //Enemy Attributes UI
+    public TextMeshProUGUI eattackattrText;
+    public TextMeshProUGUI edefenseattrText;
+    public TextMeshProUGUI espeedattrText;
+    public TextMeshProUGUI edroneintattrText;
+
+
     public Scrollbar playerHealthBar;
     public Scrollbar enemyHealthBar;
 
@@ -64,14 +72,15 @@ public class BattleSystem : MonoBehaviour
     IEnumerator SetupBattle()
     {
         // Spawn Player and assign all attributes to the playerUnit Varaible
-        GameObject playerGo = Instantiate(playerPrefab, playerSpawn.position, Quaternion.identity);
+        Quaternion rotationp = Quaternion.Euler(0, 20, 0);
+        GameObject playerGo = Instantiate(playerPrefab, playerSpawn.position, rotationp);
         playerUnit = playerGo.GetComponent<Unit>();
         playerUnit.Name = "Player";
         playerAnimator = playerUnit.GetComponent<Animator>();
         // playerAnimator = playerUnit.GetComponent<Animator>();
 
         // Spawn Enemy and assign all attributes to the enemyUnit Varaible
-        Quaternion rotation = Quaternion.Euler(0, 180, 0);
+        Quaternion rotation = Quaternion.Euler(0, 230, 0);
         GameObject enemyGo = Instantiate(enemyPrefab, enemySpawn.position, rotation);
         enemyUnit = enemyGo.GetComponent<Unit>();
         enemyUnit.Name = "Enemy";
@@ -84,12 +93,16 @@ public class BattleSystem : MonoBehaviour
         enemyUnit.AssignRandomAttributes();
 
         attackattrText.text = playerUnit.attack.ToString();
+        eattackattrText.text = enemyUnit.attack.ToString();
         yield return new WaitForSeconds(2f);
         defenseattrText.text = playerUnit.defense.ToString();
+        edefenseattrText.text = enemyUnit.defense.ToString();
         yield return new WaitForSeconds(2f);
         speedattrText.text = playerUnit.speed.ToString();
+        espeedattrText.text = enemyUnit.speed.ToString();
         yield return new WaitForSeconds(2f);
         droneintattrText.text = playerUnit.droneIntelligence;
+        edroneintattrText.text = enemyUnit.droneIntelligence;
 
         playerUnit.BuffHealth();
 
@@ -106,9 +119,8 @@ public class BattleSystem : MonoBehaviour
             yield break;
         }
 
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(1);
         state = BattleState.DECISION;
-        playerAnimator.SetBool("IsShooting", false);
         playerActionSelected = false;
         enemyActionSelected = true;
 
@@ -119,7 +131,7 @@ public class BattleSystem : MonoBehaviour
 
         yield return new WaitForSeconds(3);
 
-        float remainingTime = 10f; // Initial time
+        float remainingTime = 5f; // Initial time
 
         while (remainingTime > 0f)
         {
@@ -168,13 +180,13 @@ public class BattleSystem : MonoBehaviour
        
         if (playerUnit.speed > enemyUnit.speed)
         {
-            PerformUnitAction(playerUnit);
-            PerformUnitAction(enemyUnit);
+            PerformUnitAction(playerUnit, playerAnimator);
+            PerformUnitAction(enemyUnit, enemyAnimator);
         }
         else
         {
-            PerformUnitAction(enemyUnit);
-            PerformUnitAction(playerUnit);
+            PerformUnitAction(enemyUnit, enemyAnimator);
+            PerformUnitAction(playerUnit, playerAnimator);
         }
         StartCoroutine(SimultaneousDecisionMaking());
     }    
@@ -233,7 +245,7 @@ public class BattleSystem : MonoBehaviour
         SetSelectedPlayerAction("DA");
     }
 
-    void PerformUnitAction(Unit unit)
+    void PerformUnitAction(Unit unit, Animator anim)
     {
         switch (unit.unitChoice)
         {
@@ -245,9 +257,11 @@ public class BattleSystem : MonoBehaviour
                 break;
             case "R":
                 unit.ReloadWeapon();
+                anim.SetTrigger("Reload");
                 Debug.Log(unit.Name + " reloded there current ammo is now: " + unit.currentAmmo);
                 break;
             case "D":
+                anim.SetTrigger("Dodge");
                 Debug.Log(unit.Name + " dodged!");
                 break;
             case "RR":
@@ -270,12 +284,13 @@ public class BattleSystem : MonoBehaviour
         if (enemyUnit.unitChoice == "D")
         {
             playerUnit.currentAmmo--;
+            playerAnimator.SetTrigger("Shoot");
             return;
         }
         if (playerUnit.currentAmmo > 0)
         {
             playerUnit.currentAmmo -= 1;
-            playerAnimator.SetBool("IsShooting", true);
+            playerAnimator.SetTrigger("Shoot");
             enemyUnit.currentHP -= playerUnit.damage;
             Debug.Log("You hit the ememy, there health is now: " + enemyUnit.currentHP);
             UpdateHealthBar(enemyUnit, enemyHealthBar);
@@ -299,7 +314,6 @@ public class BattleSystem : MonoBehaviour
         if (playerUnit.currentAmmo >= 3)
         {
             playerUnit.currentAmmo -= 3;
-            // playerAnimator.SetTrigger("AttackTrigger");
             enemyUnit.currentHP -= 50;
             Debug.Log("Your drone hit the enemy, there health is now: " + enemyUnit.currentHP);
             UpdateHealthBar(enemyUnit, enemyHealthBar);
@@ -324,12 +338,14 @@ public class BattleSystem : MonoBehaviour
         if (playerUnit.unitChoice == "D")
         {
             enemyUnit.currentAmmo--;
+            enemyAnimator.SetTrigger("Shoot");
             return;
         }
 
         if (enemyUnit.currentAmmo > 0)
         {
             enemyUnit.currentAmmo -= 1;
+            enemyAnimator.SetTrigger("Shoot");
             playerUnit.currentHP -= enemyUnit.damage;
             Debug.Log("The enemy has hit you! Your health is now: " + playerUnit.currentHP);
             UpdateHealthBar(playerUnit, playerHealthBar);
@@ -353,7 +369,6 @@ public class BattleSystem : MonoBehaviour
         if (enemyUnit.currentAmmo >= 3)
         {
             enemyUnit.currentAmmo -= 3;
-            // playerAnimator.SetTrigger("AttackTrigger");
             playerUnit.currentHP -= 50;
             Debug.Log("The enemy hit you with a drone! Your health is now: " + playerUnit.currentHP);
             UpdateHealthBar(playerUnit, playerHealthBar);
