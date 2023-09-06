@@ -3679,8 +3679,8 @@ MonoBehaviour:
   Name: 
   unitChoice: 
   maxHP: 100
-  currentHP: 100
-  damage: 20
+  currentHP: 1000
+  damage: 100
   currentAmmo: 1
   reloadAmount: 1
   dodge: 0
@@ -3688,6 +3688,10 @@ MonoBehaviour:
   defense: 0
   speed: 0
   droneIntelligence: 0
+  attackBoost: 0
+  healthBoost: 0
+  dodgeBoost: 0
+  droneDmg: 0
 --- !u!1 &1894082778751734
 GameObject:
   m_ObjectHideFlags: 0
